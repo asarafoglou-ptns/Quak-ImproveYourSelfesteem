@@ -47,6 +47,15 @@ server <- function(input, output, session) {
     }
   })
   
+  shiny::observeEvent(input$ok, {
+    neg_selfimage <- shiny::isolate(input$ok)
+    # Add submission to csv
+    if (nchar(neg_selfimage) > 0){
+      readr::write_lines(neg_selfimage, "neg_selfimage.txt")
+      removeModal()
+    }
+  })
+  
   # Read the content of the introduction file
   introduction_text <- readr::read_file("R/introduction.md")
   
