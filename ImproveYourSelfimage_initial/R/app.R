@@ -40,7 +40,7 @@ server <- function(input, output, session) {
       shiny::showModal(shiny::modalDialog(
         title = "Welcome!",
         shiny::textInput("neg_selfimage", "Describe your negative self-image"),
-        easyClose = TRUE,
+        easyClose = FALSE,
         footer = shiny::actionButton("ok", "ok")
       ))
       first_time$loaded <- FALSE
@@ -52,7 +52,13 @@ server <- function(input, output, session) {
     # Add submission to csv
     if (nchar(neg_selfimage) > 0){
       readr::write_lines(neg_selfimage, "neg_selfimage.txt")
-      removeModal()
+      shiny::showModal(shiny::modalDialog(
+        title = "Welcome!",
+        shiny::textInput("pos_selfimage", "Describe your desired positive 
+                         self-image"),
+        easyClose = FALSE,
+        footer = shiny::actionButton("ok", "ok")
+      ))
     }
   })
   
