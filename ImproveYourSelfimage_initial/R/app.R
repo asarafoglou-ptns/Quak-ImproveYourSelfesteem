@@ -5,13 +5,19 @@ library(markdown)
 library(readr)
 
 ui <- shiny::navbarPage("Improve your self-image",
+  
+  # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
     shiny::uiOutput("introduction")
   ),
+  
+  # Whitebook tab
   shiny::tabPanel("Whitebook",
+    # Explanation whitebook
     shiny::p("Describe what went well today, how it made you feel, and what 
       these events tell you about yourself. It's okay to repeat positive events,
       feelings, or positive traits."),
+    # Input user whitebook
     shiny::textInput("q1_input", "Describe something that went well/you did
       well today. Anything goes, big or small."),
     shiny::textInput("q2_input", "How did the event make you feel?"),
@@ -20,52 +26,91 @@ ui <- shiny::navbarPage("Improve your self-image",
       than one positive trait that you can think of, enter the first trait,
       click submit, fill in the second trait, submit, and
       so on."),
+    # Submit input 
     shiny::actionButton("save_button", "Submit")
     ),
-    shiny::tabPanel("Positive trait wordcloud",
+  
+  # Wordcloud of positive traits tab
+  shiny::tabPanel("Positive trait wordcloud",
+    # Explanation wordcloud
     shiny::p("This is a wordcloud of all the positive traits you have entered in
       your whitebook. Bigger words indicate that you have entered the positive
       trait more often. Do you think these traits might describe you?"),
-                                        shiny::plotOutput("wordcloud")
+    # Show wordcloud
+    shiny::plotOutput("wordcloud")
     )
 )
 
 server <- function(input, output, session) {
+  # Load background wordcloud function
   source("R/generate_wordcloud.R")
-  first_time <- shiny::reactiveValues(loaded = TRUE)
   
-  # Show welcome screen only during first loading app
-  shiny::observe({
-    if (first_time$loaded) {
-      shiny::showModal(shiny::modalDialog(
-        title = "Welcome!",
-        shiny::textInput("neg_selfimage", "Describe your negative self-image"),
-        easyClose = FALSE,
-        footer = shiny::actionButton("ok", "ok")
-      ))
-      first_time$loaded <- FALSE
-    }
-  })
-  
-  shiny::observeEvent(input$ok, {
-    neg_selfimage <- shiny::isolate(input$ok)
-    # Add submission to csv
-    if (nchar(neg_selfimage) > 0){
-      readr::write_lines(neg_selfimage, "neg_selfimage.txt")
-      shiny::showModal(shiny::modalDialog(
-        title = "Welcome!",
-        shiny::textInput("pos_selfimage", "Describe your desired positive 
-                         self-image"),
-        easyClose = FALSE,
-        footer = shiny::actionButton("ok", "ok")
-      ))
-    }
-  })
-  
-  # Read the content of the introduction file
+  # Read the content of the introduction text file
   introduction_text <- readr::read_file("R/introduction.md")
   
-  # Render the introduction text using Markdown
+  # Check if first loading app
+  shiny::observe({
+    if (!file.exists("pos_selfimage.txt")) {
+      
+      # Show welcome screen to first time users
+      shiny::showModal(shiny::modalDialog(
+        title = "Welcome!",
+        HTML(markdown::markdownToHTML(introduction_text)),
+        easyClose = FALSE,
+        footer = shiny::actionButton("ok", "ok")
+      ))
+    }
+  })
+  
+  # Ask first time user for negative self-image
+  shiny::observeEvent(input$ok, {
+    shiny::showModal(shiny::modalDialog(
+      title = "Welcome!",
+      shiny::textInput("neg_selfimage", 
+                       "The first step is to describe your current negative 
+                       self-image. A negative self-image is a general, 
+                       negative statement about yourself starting with I, 
+                       for example 'I am not good enough'. How would you 
+                       describe your current negative self-image?"),
+      easyClose = FALSE,
+      footer = shiny::actionButton("ok2", "ok")
+    ))
+  })
+  
+  # Trigger next pop up window
+  shiny::observeEvent(input$ok2, {
+    neg_selfimage <- shiny::isolate(input$neg_selfimage)
+    
+    # Add negative self-image to txt file
+    if (nchar(neg_selfimage) > 0){
+      readr::write_lines(neg_selfimage, "neg_selfimage.txt")
+      
+      # Ask first time user to define desired positive self-image
+      shiny::showModal(shiny::modalDialog(
+        title = "Welcome!",
+        shiny::textInput("pos_selfimage", 
+                         "The next step is to define the positive self-image
+                         you want to strive towards. This is a positive general
+                         statement about yourself. It's easiest to think about
+                         the negative self-image you just formulated and rewrite
+                         it to a positive statment. For example, 'I am 
+                         worthless' becomes 'I am worthwhile'."),
+        easyClose = FALSE,
+        footer = shiny::actionButton("ok3", "ok")
+      ))
+    }
+  })
+  
+  # Handle the submission of the positive self-image
+  shiny::observeEvent(input$ok3, {
+    pos_selfimage <- isolate(input$pos_selfimage)
+    if (nchar(pos_selfimage) > 0) {
+      readr::write_lines(pos_selfimage, "pos_selfimage.txt")
+      removeModal()
+    }
+  })
+  
+  # Render the introduction text
   output$introduction <- shiny::renderUI({
     shiny::HTML(markdown::markdownToHTML(introduction_text))
   })
@@ -86,8 +131,10 @@ server <- function(input, output, session) {
   }
   
   # Load existing text data from CSV file
-  whitebook_data <- readr::read_csv("whitebook_data.csv", col_types = readr::cols())
-  wordcloud_data <- readr::read_csv("wordcloud_data.csv", col_types = readr::cols())
+  whitebook_data <- readr::read_csv("whitebook_data.csv", 
+                                    col_types = readr::cols())
+  wordcloud_data <- readr::read_csv("wordcloud_data.csv", 
+                                    col_types = readr::cols())
   
   # Render wordcloud
   output$wordcloud <- shiny::renderPlot({
