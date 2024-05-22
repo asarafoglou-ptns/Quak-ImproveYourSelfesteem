@@ -1,0 +1,5 @@
+/* Custom CSS for responsive Markdown content */
+.markdown-content {
+  max-width: 100%;
+  width: auto;
+}

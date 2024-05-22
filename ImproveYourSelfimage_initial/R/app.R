@@ -4,9 +4,12 @@ library(dplyr)
 library(markdown)
 library(readr)
 library(RColorBrewer)
+library(DT)
 
-ui <- shiny::navbarPage("Improve your self-image",
-  
+ui <- shiny::fluidPage(
+  shiny::titlePanel("Improve your self-image"),
+  includeCSS("styles.css"),
+  tabsetPanel(
   # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
     shiny::uiOutput("introduction")
@@ -28,7 +31,8 @@ ui <- shiny::navbarPage("Improve your self-image",
       click submit, fill in the second trait, submit, and
       so on."),
     # Submit input 
-    shiny::actionButton("save_button", "Submit")
+    shiny::actionButton("save_button", "Submit"),
+    DT::dataTableOutput("whitebook_table")
     ),
   
   # Wordcloud of positive traits tab
@@ -38,8 +42,8 @@ ui <- shiny::navbarPage("Improve your self-image",
       your whitebook. Bigger words indicate that you have entered the positive
       trait more often. Do you think these traits might describe you?"),
     # Show wordcloud
-    shiny::plotOutput("wordcloud")
-    )
+    shiny::plotOutput("wordcloud"))
+  )
 )
 
 server <- function(input, output, session) {
@@ -57,7 +61,7 @@ server <- function(input, output, session) {
       # Show welcome screen to first time users
       shiny::showModal(shiny::modalDialog(
         title = "Welcome!",
-        HTML(markdown::markdownToHTML(introduction_text)),
+        HTML(markdown::markdownToHTML(introduction_text, template = FALSE)),
         easyClose = FALSE,
         footer = shiny::actionButton("ok", "ok")
       ))
@@ -114,7 +118,7 @@ server <- function(input, output, session) {
   
   # Render the introduction text
   output$introduction <- shiny::renderUI({
-    shiny::HTML(markdown::markdownToHTML(introduction_text))
+    shiny::HTML(markdown::markdownToHTML(introduction_text, template = FALSE))
   })
   
   # Create empty data frames for if data does not exist
@@ -135,6 +139,11 @@ server <- function(input, output, session) {
     if (nrow(wordcloud_data) > 0) {
       generate_wordcloud(wordcloud_data)
     }
+  })
+  
+  # Render whitebook data table
+  output$whitebook_table <- DT::renderDataTable({
+    DT::datatable(whitebook_data)
   })
   
   # Get submitted input whitebook
@@ -161,6 +170,11 @@ server <- function(input, output, session) {
       # Render updated wordcloud
       output$wordcloud <- shiny::renderPlot({
         generate_wordcloud(wordcloud_data)
+      })
+      
+      # Render whitebook data table
+      output$whitebook_table <- DT::renderDataTable({
+        DT::datatable(whitebook_data)
       })
       
       # Show message that answers have been submitted
