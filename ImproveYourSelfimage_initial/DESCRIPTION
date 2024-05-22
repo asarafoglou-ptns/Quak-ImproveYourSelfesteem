@@ -20,4 +20,5 @@ Imports:
     shiny,
     dplyr,
     markdown,
-    readr
+    readr,
+    RColorBrewer
