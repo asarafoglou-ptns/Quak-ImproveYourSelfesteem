@@ -5,8 +5,9 @@ library(markdown)
 library(readr)
 library(RColorBrewer)
 library(DT)
+library(shinythemes)
 
-ui <- shiny::fluidPage(
+ui <- shiny::fluidPage(theme = bs_theme(version = 5, bootswatch = "morph"),
   shiny::titlePanel("Improve your self-image"),
   includeCSS("styles.css"),
   tabsetPanel(
