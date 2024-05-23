@@ -1,4 +1,4 @@
-# server_functions.R
+# Function that saves whitebook entry and updates wordcloud and table
 save_whitebook_entry <- function(input, output, whitebook_data) {
   date <- as.character(Sys.Date())
   # Get submitted input whitebook

@@ -139,9 +139,6 @@ server <- function(input, output, session) {
   # Ensure Date column is character
   whitebook_data$Date <- as.character(whitebook_data$Date)
   
-  # Print data types for debugging
-  print(str(whitebook_data))
-  
   # Render wordcloud
   output$wordcloud <- shiny::renderPlot({
     if (nrow(wordcloud_data) > 0) {
