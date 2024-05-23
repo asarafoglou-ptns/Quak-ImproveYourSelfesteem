@@ -3,49 +3,55 @@ library(wordcloud)
 library(dplyr)
 library(markdown)
 library(readr)
-library(shinyWidgets)
+library(RColorBrewer)
+library(DT)
+library(bslib)
 
-ui <- shiny::navbarPage("Improve your self-image",
-                        
-                        # Tab showing the introduction message of the app
-                        shiny::tabPanel("Introduction",
-                                        shiny::uiOutput("introduction")
-                        ),
-                        
-                        # Whitebook tab
-                        shiny::tabPanel("Whitebook",
-                                        # Explanation whitebook
-                                        shiny::p("Describe what went well today, how it made you feel, and what 
+ui <- shiny::fluidPage(theme = bslib::bs_theme(version = 5, bootswatch = "morph"),
+                       shiny::titlePanel("Improve your self-image"),
+                       includeCSS("styles.css"),
+                       tabsetPanel(
+                         # Tab showing the introduction message of the app
+                         shiny::tabPanel("Introduction",
+                                         shiny::uiOutput("introduction")
+                         ),
+                         
+                         # Whitebook tab
+                         shiny::tabPanel("Whitebook",
+                                         # Explanation whitebook
+                                         shiny::p("Describe what went well today, how it made you feel, and what 
       these events tell you about yourself. It's okay to repeat positive events,
       feelings, or positive traits."),
-                                        # Input user whitebook
-                                        shiny::textInput("q1_input", "Describe something that went well/you did
+                                         # Input user whitebook
+                                         shiny::textInput("q1_input", "Describe something that went well/you did
       well today. Anything goes, big or small."),
-                                        shiny::textInput("q2_input", "How did the event make you feel?"),
-                                        shiny::textInput("q3_input", "What does the event say about you?
+                                         shiny::textInput("q2_input", "How did the event make you feel?"),
+                                         shiny::textInput("q3_input", "What does the event say about you?
       which positive trait is evident from this event? If there is more
       than one positive trait that you can think of, enter the first trait,
       click submit, fill in the second trait, submit, and
       so on."),
-                                        # Submit input 
-                                        shiny::actionButton("save_button", "Submit")
-                        ),
-                        
-                        # Wordcloud of positive traits tab
-                        shiny::tabPanel("Positive trait wordcloud",
-                                        # Explanation wordcloud
-                                        shiny::p("This is a wordcloud of all the positive traits you have entered in
+                                         # Submit input 
+                                         shiny::actionButton("save_button", "Submit"),
+                                         DT::dataTableOutput("whitebook_table")
+                         ),
+                         
+                         # Wordcloud of positive traits tab
+                         shiny::tabPanel("Positive trait wordcloud",
+                                         # Explanation wordcloud
+                                         shiny::p("This is a wordcloud of all the positive traits you have entered in
       your whitebook. Bigger words indicate that you have entered the positive
       trait more often. Do you think these traits might describe you?"),
-                                        # Show wordcloud
-                                        shiny::plotOutput("wordcloud")
-                        )
+                                         # Show wordcloud
+                                         shiny::plotOutput("wordcloud"))
+                       )
 )
 
 server <- function(input, output, session) {
-  # Load background functions
+  # Load background wordcloud function
   source("R/generate_wordcloud.R")
   source("R/dataloading.R")
+  source("R/save_whitebook_entry.R")
   
   # Read the content of the introduction text file
   introduction_text <- readr::read_file("R/introduction.md")
@@ -57,7 +63,7 @@ server <- function(input, output, session) {
       # Show welcome screen to first time users
       shiny::showModal(shiny::modalDialog(
         title = "Welcome!",
-        HTML(markdown::markdownToHTML(introduction_text)),
+        HTML(markdown::markdownToHTML(introduction_text, template = FALSE)),
         easyClose = FALSE,
         footer = shiny::actionButton("ok", "ok")
       ))
@@ -114,7 +120,7 @@ server <- function(input, output, session) {
   
   # Render the introduction text
   output$introduction <- shiny::renderUI({
-    shiny::HTML(markdown::markdownToHTML(introduction_text))
+    shiny::HTML(markdown::markdownToHTML(introduction_text, template = FALSE))
   })
   
   # Create empty data frames for if data does not exist
@@ -126,10 +132,9 @@ server <- function(input, output, session) {
                                        freq = numeric(0),
                                        stringsAsFactors = FALSE)
   
-  # Load existing data using the dataloading function
+  # Load data if it exists, otherwise load default data
   whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
   wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
-  
   
   # Render wordcloud
   output$wordcloud <- shiny::renderPlot({
@@ -138,31 +143,11 @@ server <- function(input, output, session) {
     }
   })
   
-  shiny::observeEvent(input$save_button, {
-    q1 <- shiny::isolate(input$q1_input)
-    q2 <- shiny::isolate(input$q2_input)
-    q3 <- shiny::isolate(input$q3_input)
-    
-    if (nchar(q1) > 0 | nchar(q2) > 0 | nchar(q3) > 0) {
-      row <- data.frame(Event = q1, Feeling = q2, Pers_trait = q3,
-                        stringsAsFactors = FALSE)
-      whitebook_data <<- dplyr::bind_rows(whitebook_data, row)
-      readr::write_csv(whitebook_data, "whitebook_data.csv")
-      
-      word_counts <- dplyr::count(whitebook_data, Pers_trait)
-      wordcloud_data <<- as.data.frame(word_counts)
-      colnames(wordcloud_data) <- c("word", "freq")
-      readr::write_csv(wordcloud_data, "wordcloud_data.csv")
-      
-      output$wordcloud <- shiny::renderPlot({
-        generate_wordcloud(wordcloud_data)
-      })
-    } else {shiny::showModal(shiny::modalDialog(
-      title = "Enter three answers",
-      easyClose = TRUE,
-      footer = shiny::actionButton("ok4", "ok")
-    ))
-    }
-  }  
-  )
+  # Render whitebook data table
+  output$whitebook_table <- DT::renderDataTable({
+    DT::datatable(whitebook_data)
+  })
+  
+  # Get submitted input whitebook
+  save_whitebook_entry(input, output, whitebook_data)
 }
