@@ -6,10 +6,11 @@ library(readr)
 library(DT)
 library(bslib)
 
-ui <- shiny::fluidPage(theme = bslib::bs_theme(version = 5, bootswatch = "morph"),
-  shiny::titlePanel("Improve your self-image"),
+ui <- shiny::navbarPage(
+  "Improve your self-image",
+  theme = bslib::bs_theme(version = 5, bootswatch = "lux"),
   includeCSS("styles.css"),
-  tabsetPanel(
+  fluid = TRUE,
   # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
     shiny::uiOutput("introduction")
@@ -32,8 +33,7 @@ ui <- shiny::fluidPage(theme = bslib::bs_theme(version = 5, bootswatch = "morph"
       so on."),
     # Submit input 
     shiny::actionButton("save_button", "Submit"),
-    DT::dataTableOutput("whitebook_table")
-    ),
+    DT::dataTableOutput("whitebook_table")),
   
   # Wordcloud of positive traits tab
   shiny::tabPanel("Positive trait wordcloud",
@@ -42,7 +42,17 @@ ui <- shiny::fluidPage(theme = bslib::bs_theme(version = 5, bootswatch = "morph"
       your whitebook. Bigger words indicate that you have entered the positive
       trait more often. Do you think these traits might describe you?"),
     # Show wordcloud
-    shiny::plotOutput("wordcloud"))
+    shiny::plotOutput("wordcloud")
+    ),
+  
+  # Likelihood positive self-image
+  shiny::navbarMenu("Positive self-image",
+    shiny::tabPanel("Entry",
+    "Entry"
+    ),
+    shiny::tabPanel("Graph",
+    "Graph"  
+    )
   )
 )
 
