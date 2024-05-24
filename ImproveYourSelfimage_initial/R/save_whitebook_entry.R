@@ -1,6 +1,7 @@
 # Function that saves whitebook entry and updates wordcloud and table
 save_whitebook_entry <- function(input, output, whitebook_data) {
-  date <- as.character(Sys.Date())
+  date_char <- as.character(Sys.Date())
+  
   # Get submitted input whitebook
   shiny::observeEvent(input$save_button, {
     q1 <- shiny::isolate(input$q1_input)
@@ -11,7 +12,7 @@ save_whitebook_entry <- function(input, output, whitebook_data) {
     if (nchar(q1) > 0 & nchar(q2) > 0 & nchar(q3) > 0) {
       
       # Add submission to whitebook
-      row <- data.frame(Date = date, 
+      row <- data.frame(Date = date_char, 
                         Event = q1, 
                         Feeling = q2, 
                         Pers_trait = q3, 

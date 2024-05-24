@@ -5,6 +5,7 @@ library(markdown)
 library(readr)
 library(DT)
 library(bslib)
+library(ggplot2)
 
 ui <- shiny::navbarPage(
   "Improve your self-image",
@@ -55,7 +56,7 @@ ui <- shiny::navbarPage(
       shiny::actionButton("save_button2", "Submit"),
     ),
     shiny::tabPanel("Graph",
-    "Graph"  
+      shiny::plotOutput("plot") 
     )
   )
 )
@@ -66,18 +67,19 @@ server <- function(input, output, session) {
   source("R/dataloading.R")
   source("R/save_whitebook_entry.R")
   source("R/first_use_app.R")
+  source("R/save_likelihood_selfimage.R")
   
-  # Read the content of the introduction text file
+  # Load the content of the introduction text file
   introduction_text <- readr::read_file("R/introduction.md")
   
-  # Read the user-defined positive self-image from the text file
+  # Load user-defined positive self-image
   pos_selfimage <- if (file.exists("pos_selfimage.txt")) {
     readr::read_file("pos_selfimage.txt")
   } else {
     "Not defined yet"
   }
   
-  # Call the first_use_app function
+  # Show introduction if first using app
   first_use_app(input, output, introduction_text)
   
   # Render the introduction text
@@ -102,9 +104,13 @@ server <- function(input, output, session) {
                                        freq = numeric(0),
                                        stringsAsFactors = FALSE)
   
+  default_selfimage_data <- data.frame(date = numeric(0),
+                                       likelihood_selfimage = numeric(0))
+  
   # Load data if it exists, otherwise load default data
   whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
   wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
+  likelihood_data <- dataloading("selfimage_data.csv", default_wordcloud_data)
   
   # Ensure Date column is character
   whitebook_data$Date <- as.character(whitebook_data$Date)
@@ -116,11 +122,30 @@ server <- function(input, output, session) {
     }
   })
   
+  # Render likelihood graph
+  output$plot <- shiny::renderPlot({
+    # Create the line and point graph with date on the x-axis
+    ggplot2::ggplot(likelihood_data, ggplot2::aes(x = date, y = likelihood_selfimage)) +
+      ggplot2::geom_line(color = "blue", size = 1) +  # Customize line color and size
+      ggplot2::geom_point(color = "red", size = 3) +  # Customize point color and size
+      ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
+                    x = "Date",
+                    y = "Likelihood") +
+      ggplot2::theme_minimal() +                      # Use a minimal theme for a clean look
+      ggplot2::theme(
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold")  # Center and bold title
+      )
+  })
+  
   # Render whitebook data table
   output$whitebook_table <- DT::renderDataTable({
     DT::datatable(whitebook_data)
   })
   
-  # Get submitted input whitebook
+  # Handle submitted input whitebook
   save_whitebook_entry(input, output, whitebook_data)
+  
+  # Handle submitted input likelihood positive self-image
+  save_likelihood_selfimage(input, output, likelihood_data)
+  
 }
