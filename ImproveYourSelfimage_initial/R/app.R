@@ -43,7 +43,8 @@ ui <- shiny::navbarPage(
       your whitebook. Bigger words indicate that you have entered the positive
       trait more often. Do you think these traits might describe you?"),
     # Show wordcloud
-    shiny::plotOutput("wordcloud")
+    shiny::plotOutput("wordcloud"),
+    shiny::downloadButton("download_wordcloud", "Save Wordcloud as Image")
     ),
 
   # Likelihood positive self-image
@@ -56,7 +57,8 @@ ui <- shiny::navbarPage(
       shiny::actionButton("save_button2", "Submit"),
     ),
     shiny::tabPanel("Graph",
-      shiny::plotOutput("plot")
+      shiny::plotOutput("plot"),
+      shiny::downloadButton("download_plot", "Save Plot as Image")
     )
   )
 )
@@ -122,6 +124,19 @@ server <- function(input, output, session) {
     }
   })
 
+  # Download wordcloud
+  output$download_wordcloud <- shiny::downloadHandler(
+    filename = function() {
+      paste("positive_traits_wordcloud", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      png(file, width = 800, height = 600)
+      generate_wordcloud(wordcloud_data)
+      dev.off()
+    }
+  )
+
+
   # Render likelihood graph
   output$plot <- shiny::renderPlot({
     # Create the line and point graph with date on the x-axis
@@ -136,6 +151,16 @@ server <- function(input, output, session) {
         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold")
       )
   })
+
+  # Download plot
+  output$download_plot <- shiny::downloadHandler(
+    filename = function() {
+      paste("likelihood_positive_self_image", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      ggplot2::ggsave(file, plot = ggplot2::last_plot(), device = "png", width = 8, height = 6)
+    }
+  )
 
   # Render whitebook data table
   output$whitebook_table <- DT::renderDataTable({
