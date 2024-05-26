@@ -6,6 +6,7 @@ library(readr)
 library(DT)
 library(bslib)
 library(ggplot2)
+library(RColorBrewer)
 
 ui <- shiny::navbarPage(
   "Improve your self-image",

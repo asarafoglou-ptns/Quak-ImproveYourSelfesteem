@@ -21,4 +21,7 @@ Imports:
     dplyr,
     markdown,
     readr,
-    RColorBrewer
+    RColorBrewer,
+    DT,
+    bslib,
+    ggplot2
