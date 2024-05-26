@@ -20,8 +20,8 @@ save_likelihood_selfimage <- function(input, output, selfimage_data) {
     # Render updated graph
     output$plot <- shiny::renderPlot({
       ggplot2::ggplot(selfimage_data, ggplot2::aes(x = date, y = likelihood_selfimage)) +
-        ggplot2::geom_line(color = "blue", size = 1) +
-        ggplot2::geom_point(color = "red", size = 3) +
+        ggplot2::geom_line(color = "blue", linewidth = 1) +
+        ggplot2::geom_point(color = "blue", size = 3) +
         ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
                       x = "Date",
                       y = "Likelihood") +

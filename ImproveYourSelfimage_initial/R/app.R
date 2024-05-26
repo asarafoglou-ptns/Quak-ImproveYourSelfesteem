@@ -126,8 +126,8 @@ server <- function(input, output, session) {
   output$plot <- shiny::renderPlot({
     # Create the line and point graph with date on the x-axis
     ggplot2::ggplot(likelihood_data, ggplot2::aes(x = date, y = likelihood_selfimage)) +
-      ggplot2::geom_line(color = "blue", size = 1) +
-      ggplot2::geom_point(color = "red", size = 3) +
+      ggplot2::geom_line(color = "blue", linewidth = 1) +
+      ggplot2::geom_point(color = "blue", size = 3) +
       ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
                     x = "Date",
                     y = "Likelihood") +
