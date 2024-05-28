@@ -10,8 +10,17 @@ library(RColorBrewer)
 
 ui <- shiny::navbarPage(
   "Improve your self-image",
-  theme = bslib::bs_theme(version = 5, bootswatch = "lux"),
-  includeCSS("styles.css"),
+  theme = bslib::bs_theme(
+    bootswatch = "lux",
+    navbar_color = "#3498db",
+    text_color = "#00008B",
+    primary = "#3498db",
+    secondary = "#3498db",
+    success = "#3498db",
+    info = "#3498db",
+    warning = "#ffc107",s
+    danger = "#dc3545"
+  ),
   fluid = TRUE,
   # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
@@ -19,45 +28,64 @@ ui <- shiny::navbarPage(
   ),
 
   # Whitebook tab
-  shiny::tabPanel("Whitebook",
-    # Explanation whitebook
-    shiny::p("Describe what went well today, how it made you feel, and what
-      these events tell you about yourself. It's okay to repeat positive events,
-      feelings, or positive traits."),
-    # Input user whitebook
-    shiny::textInput("q1_input", "Describe something that went well/you did
-      well today. Anything goes, big or small."),
-    shiny::textInput("q2_input", "How did the event make you feel?"),
-    shiny::textInput("q3_input", "What does the event say about you?
-      which positive trait is evident from this event? If there is more
-      than one positive trait that you can think of, enter the first trait,
-      click submit, fill in the second trait, submit, and
-      so on."),
-    # Submit input
-    shiny::actionButton("save_button", "Submit"),
-    DT::dataTableOutput("whitebook_table")),
+  shiny::navbarMenu("Whitebook",
 
-  # Wordcloud of positive traits tab
-  shiny::tabPanel("Positive trait wordcloud",
-    # Explanation wordcloud
-    shiny::p("This is a wordcloud of all the positive traits you have entered in
-      your whitebook. Bigger words indicate that you have entered the positive
-      trait more often. Do you think these traits might describe you?"),
-    # Show wordcloud
-    shiny::plotOutput("wordcloud"),
-    shiny::downloadButton("download_wordcloud", "Save Wordcloud as Image")
+    # Entry whitebook
+    shiny::tabPanel("New entry",
+      # Explanation whitebook
+      shiny::p("Describe what went well today, how it made you feel, and what
+        these events tell you about yourself. It's okay to repeat positive events,
+        feelings, or positive traits."),
+      # Input user whitebook
+      shiny::textInput("q1_input", "Describe something that went well or
+        something you did well today. It can be anything, big or small."),
+      shiny::textInput("q2_input", "How did the event make you feel?"),
+      shiny::textInput("q3_input", "What does the event say about you? Which
+        positive trait is evident from this event? If you can think of more
+        than one positive trait, enter the first trait and click submit. Then,
+        fill in the second trait and submit again, and so on."),
+      # Submit input
+      shiny::actionButton("save_button", "Submit")
+      ),
+
+    # Table of whitebook data
+    shiny::tabPanel("View entries",
+      shiny::p("Here, you can review all the entries you've submitted to your
+        whitebook. You'll see the positive events you've described,how they
+        made you feel, and the personality traits you've associated with
+        them."),
+      DT::dataTableOutput("whitebook_table")
     ),
+
+    # Wordcloud of positive traits tab
+    shiny::tabPanel("Wordcloud",
+      # Explanation wordcloud
+      shiny::p("This wordcloud displays all the positive traits you've recorded
+        in your whitebook. The size of each word reflects how frequently you've
+        mentioned that trait—the more often you've entered it, the larger it
+        appears. Do you think these traits might describe you?"),
+      # Show wordcloud
+      shiny::plotOutput("wordcloud"),
+      shiny::downloadButton("download_wordcloud", "Save Wordcloud as Image")
+    )
+  ),
 
   # Likelihood positive self-image
   shiny::navbarMenu("Positive self-image",
-    shiny::tabPanel("Entry",
+
+    # New entries rating likelihood positive self-image
+    shiny::tabPanel("New entry",
       shiny::uiOutput("self_image_text"),
       shiny::sliderInput("slider1", label = "Right
-        now, how likely do you think it is that that sentence is true?", min = 0,
-        max = 100, value = 50),
-      shiny::actionButton("save_button2", "Submit"),
+        now, how likely do you think it is that that sentence is true?",
+        min = 0, max = 100, value = 50),
+      shiny::actionButton("save_button2", "Submit")
     ),
-    shiny::tabPanel("Graph",
+
+    # Graphing belief in positive self-image
+    shiny::tabPanel("Progress graph",
+      shiny::p("Down below there is a graph showing how your belief in your
+        desired positive self-image has changed over time."),
       shiny::plotOutput("plot"),
       shiny::downloadButton("download_plot", "Save Plot as Image")
     )
@@ -141,9 +169,10 @@ server <- function(input, output, session) {
   # Render likelihood graph
   output$plot <- shiny::renderPlot({
     # Create the line and point graph with date on the x-axis
-    ggplot2::ggplot(likelihood_data, ggplot2::aes(x = date, y = likelihood_selfimage)) +
-      ggplot2::geom_line(color = "blue", linewidth = 1) +
-      ggplot2::geom_point(color = "blue", size = 3) +
+    ggplot2::ggplot(likelihood_data,
+                    ggplot2::aes(x = date, y = likelihood_selfimage)) +
+      ggplot2::geom_line(color = "#00008B", linewidth = 1) +
+      ggplot2::geom_point(color = "#00008B", size = 3) +
       ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
                     x = "Date",
                     y = "Likelihood") +
@@ -159,7 +188,11 @@ server <- function(input, output, session) {
       paste("likelihood_positive_self_image", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      ggplot2::ggsave(file, plot = ggplot2::last_plot(), device = "png", width = 8, height = 6)
+      ggplot2::ggsave(file,
+                      plot = ggplot2::last_plot(),
+                      device = "png",
+                      width = 8,
+                      height = 6)
     }
   )
 
@@ -172,6 +205,6 @@ server <- function(input, output, session) {
   save_whitebook_entry(input, output, whitebook_data)
 
   # Handle submitted input likelihood positive self-image
-  save_likelihood_selfimage(input, output, likelihood_data)
+  save_likelihood_selfimage(input, output, likelihood_data, pos_selfimage)
 
 }
