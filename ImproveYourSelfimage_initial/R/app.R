@@ -9,7 +9,7 @@ library(ggplot2)
 library(RColorBrewer)
 
 ui <- shiny::navbarPage(
-  "Improve your self-image",
+  "Improve your selfesteem",
   theme = bslib::bs_theme(
     bootswatch = "lux",
     navbar_color = "#3498db",
@@ -18,7 +18,7 @@ ui <- shiny::navbarPage(
     secondary = "#3498db",
     success = "#3498db",
     info = "#3498db",
-    warning = "#ffc107",s
+    warning = "#ffc107",
     danger = "#dc3545"
   ),
   fluid = TRUE,
@@ -99,6 +99,7 @@ server <- function(input, output, session) {
   source("R/save_whitebook_entry.R")
   source("R/first_use_app.R")
   source("R/save_likelihood_selfimage.R")
+  source("R/generate_likelihood_plot.R")
 
   # Load the content of the introduction text file
   introduction_text <- readr::read_file("R/introduction.md")
@@ -141,9 +142,9 @@ server <- function(input, output, session) {
   # Load data if it exists, otherwise load default data
   whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
   wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
-  likelihood_data <- dataloading("selfimage_data.csv", default_wordcloud_data)
+  selfimage_data <- dataloading("selfimage_data.csv", default_wordcloud_data)
 
-  # Ensure Date column is character
+  # Ensure date column is character type
   whitebook_data$Date <- as.character(whitebook_data$Date)
 
   # Render wordcloud
@@ -165,22 +166,8 @@ server <- function(input, output, session) {
     }
   )
 
-
-  # Render likelihood graph
-  output$plot <- shiny::renderPlot({
-    # Create the line and point graph with date on the x-axis
-    ggplot2::ggplot(likelihood_data,
-                    ggplot2::aes(x = date, y = likelihood_selfimage)) +
-      ggplot2::geom_line(color = "#00008B", linewidth = 1) +
-      ggplot2::geom_point(color = "#00008B", size = 3) +
-      ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
-                    x = "Date",
-                    y = "Likelihood") +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold")
-      )
-  })
+  # Render likelihood plot
+  output$plot <- generate_likelihood_plot(selfimage_data, pos_selfimage)
 
   # Download plot
   output$download_plot <- shiny::downloadHandler(
@@ -205,6 +192,6 @@ server <- function(input, output, session) {
   save_whitebook_entry(input, output, whitebook_data)
 
   # Handle submitted input likelihood positive self-image
-  save_likelihood_selfimage(input, output, likelihood_data, pos_selfimage)
+  save_likelihood_selfimage(input, output, selfimage_data, pos_selfimage)
 
 }
