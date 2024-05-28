@@ -24,7 +24,8 @@ ui <- shiny::navbarPage(
   fluid = TRUE,
   # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
-    shiny::uiOutput("introduction")
+    shiny::uiOutput("introduction"),
+    shiny::imageOutput("selflove")
   ),
 
   # Whitebook tab
@@ -33,9 +34,11 @@ ui <- shiny::navbarPage(
     # Entry whitebook
     shiny::tabPanel("New entry",
       # Explanation whitebook
-      shiny::p("Describe what went well today, how it made you feel, and what
-        these events tell you about yourself. It's okay to repeat positive events,
-        feelings, or positive traits."),
+      shiny::p("This is your whitebook. Here you describe what went well,
+        how it made you feel, and what these events tell you about yourself.
+        Try to write in it as often as possible and mention as many things that
+        went well as possible. It's okay to repeat positive events, feelings,
+        or positive traits."),
       # Input user whitebook
       shiny::textInput("q1_input", "Describe something that went well or
         something you did well today. It can be anything, big or small."),
@@ -118,6 +121,13 @@ server <- function(input, output, session) {
   output$introduction <- shiny::renderUI({
     shiny::HTML(markdown::markdownToHTML(introduction_text, template = FALSE))
   })
+
+  # Render image
+  output$selflove <- renderImage({
+
+    list(src = "R/www/selflove.png", width = "50%")
+
+  }, deleteFile = FALSE)
 
   # Render the positive self-image text
   output$self_image_text <- renderUI({
