@@ -30,4 +30,4 @@ Computer with R installed and the following R packages: devtools, shiny, wordclo
 13. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
 
 ## Flowchart
-![Flowchart starting up the app](inst/images/Flowchart_run_app.png)
+![Flowchart starting up the app](ImproveYourSelfesteem/inst/images/Flowchart_run_app.png)
