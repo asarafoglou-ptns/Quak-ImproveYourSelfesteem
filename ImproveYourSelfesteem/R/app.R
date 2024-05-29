@@ -34,19 +34,21 @@ ui <- shiny::navbarPage(
     # Entry whitebook
     shiny::tabPanel("New entry",
       # Explanation whitebook
-      shiny::p("This is your whitebook. Here you describe what went well,
-        how it made you feel, and what these events tell you about yourself.
-        Try to write in it as often as possible and mention as many things that
-        went well as possible. It's okay to repeat positive events, feelings,
-        or positive traits."),
+      shiny::p("Welcome to your Whitebook! This is where you jot down the
+        positive moments of your day, how they made you feel, and what they
+        reveal about your character/personality traits. For instance, you might
+        write completing a task like doing the dishes. Perhaps it left you
+        feeling proud. This event could suggest personality traits like
+        determination or helpfulness. Share as many positive experiences,
+        emotions, and traits as you can. Don't hesitate to repeat!"),
       # Input user whitebook
-      shiny::textInput("q1_input", "Describe something that went well or
-        something you did well today. It can be anything, big or small."),
-      shiny::textInput("q2_input", "How did the event make you feel?"),
-      shiny::textInput("q3_input", "What does the event say about you? Which
-        positive trait is evident from this event? If you can think of more
-        than one positive trait, enter the first trait and click submit. Then,
-        fill in the second trait and submit again, and so on."),
+      shiny::textInput("q1_input", "Describe a positive event from today.
+        It can be anything, big or small. E.g., 'I did the dishes.'"),
+      shiny::textInput("q2_input", "How did it make you feel? For example, happy,
+        excited, proud, or neutral?"),
+      shiny::textInput("q3_input", "What does this event say about you?
+        Which positive personality trait is evident? E.g., determined, helpful,
+        creative. Enter one trait at a time and submit."),
       # Submit input
       shiny::actionButton("save_button", "Submit")
       ),
@@ -105,7 +107,7 @@ server <- function(input, output, session) {
   source("R/generate_likelihood_plot.R")
 
   # Load the content of the introduction text file
-  introduction_text <- readr::read_file("R/introduction.md")
+  introduction_text <- readr::read_file("inst/introduction.md")
 
   # Load user-defined positive self-image
   pos_selfimage <- if (file.exists("pos_selfimage.txt")) {
@@ -152,7 +154,7 @@ server <- function(input, output, session) {
   # Load data if it exists, otherwise load default data
   whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
   wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
-  selfimage_data <- dataloading("selfimage_data.csv", default_wordcloud_data)
+  selfimage_data <- dataloading("selfimage_data.csv", default_selfimage_data)
 
   # Ensure date column is character type
   whitebook_data$Date <- as.character(whitebook_data$Date)

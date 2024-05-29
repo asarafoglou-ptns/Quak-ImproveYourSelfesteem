@@ -1,15 +1,14 @@
 # Function to save self-image likelihood rating and update graph
-save_likelihood_selfimage <- function(input, output, selfimage_data,
-                                      pos_selfimage) {
-  # Get date
-  date <- Sys.Date()
-
-  # Check if an entry already exists for the current date
-  entry_exists <- nrow(selfimage_data[selfimage_data$date == date, ]) > 0
-
-  # Get submitted input slider
+save_likelihood_selfimage <- function(input, output, selfimage_data, pos_selfimage) {
   shiny::observeEvent(input$save_button2, {
+    # Get date
+    date <- Sys.Date()
+
+    # Check if an entry already exists for the current date
+    entry_exists <- nrow(selfimage_data[selfimage_data$date == date, ]) > 0
+
     if (!entry_exists) {
+      # Get submitted input slider
       likelihood <- shiny::isolate(input$slider1)
 
       # Add submission to data
@@ -21,7 +20,10 @@ save_likelihood_selfimage <- function(input, output, selfimage_data,
       # Write updated data to CSV
       readr::write_csv(selfimage_data, "selfimage_data.csv")
 
-      output$plot <- generate_likelihood_plot(selfimage_data, pos_selfimage)
+      # Update plot
+      output$plot <- shiny::renderPlot({
+        generate_likelihood_plot(selfimage_data, pos_selfimage)
+      })
 
       # Show message that answers have been submitted
       shiny::showModal(shiny::modalDialog(
@@ -39,11 +41,11 @@ save_likelihood_selfimage <- function(input, output, selfimage_data,
       # Show message when daily entry already submitted
       shiny::showModal(shiny::modalDialog(
         title = "Already Submitted",
-        "You have already submitted an entry for today. You can only rate the
-        likeliness of your positive self-image once daily.",
+        "You have already submitted an entry for today. You can only rate the likeliness of your positive self-image once daily.",
         easyClose = TRUE,
         footer = shiny::actionButton("ok_submit3", "ok")
       ))
+
       # Close modal when ok button is pressed
       shiny::observeEvent(input$ok_submit3, {
         shiny::removeModal()
