@@ -18,7 +18,7 @@ ui <- shiny::navbarPage(
     secondary = "#3498db",
     success = "#3498db",
     info = "#3498db",
-    warning = "#ffc107",s
+    warning = "#ffc107",
     danger = "#dc3545"
   ),
   fluid = TRUE,
