@@ -20,4 +20,8 @@ Imports:
     shiny,
     dplyr,
     markdown,
-    readr
+    readr,
+    RColorBrewer,
+    DT,
+    bslib,
+    ggplot2

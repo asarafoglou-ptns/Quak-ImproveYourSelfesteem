@@ -9,7 +9,12 @@ run_app()
 \description{
 Run the ImproveYourSelfesteem app
 }
+\examples{
+run_app()
+
+}
 \references{
 De Neef, M. (2022). Negatief zelfbeeld (Revised). Boom.
+
 De Neef, M. (z.d.). https://www.negatiefzelfbeeldbehandelen.nl/
 }
