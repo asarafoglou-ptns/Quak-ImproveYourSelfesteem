@@ -9,7 +9,7 @@ library(ggplot2)
 library(RColorBrewer)
 
 ui <- shiny::navbarPage(
-  "Improve your self-image",
+  "Improve your selfesteem",
   theme = bslib::bs_theme(
     bootswatch = "lux",
     navbar_color = "#3498db",
@@ -24,7 +24,8 @@ ui <- shiny::navbarPage(
   fluid = TRUE,
   # Tab showing the introduction message of the app
   shiny::tabPanel("Introduction",
-    shiny::uiOutput("introduction")
+    shiny::uiOutput("introduction"),
+    shiny::imageOutput("selflove")
   ),
 
   # Whitebook tab
@@ -33,17 +34,21 @@ ui <- shiny::navbarPage(
     # Entry whitebook
     shiny::tabPanel("New entry",
       # Explanation whitebook
-      shiny::p("Describe what went well today, how it made you feel, and what
-        these events tell you about yourself. It's okay to repeat positive events,
-        feelings, or positive traits."),
+      shiny::p("Welcome to your Whitebook! This is where you jot down the
+        positive moments of your day, how they made you feel, and what they
+        reveal about your character/personality traits. For instance, you might
+        write completing a task like doing the dishes. Perhaps it left you
+        feeling proud. This event could suggest personality traits like
+        determination or helpfulness. Share as many positive experiences,
+        emotions, and traits as you can. Don't hesitate to repeat!"),
       # Input user whitebook
-      shiny::textInput("q1_input", "Describe something that went well or
-        something you did well today. It can be anything, big or small."),
-      shiny::textInput("q2_input", "How did the event make you feel?"),
-      shiny::textInput("q3_input", "What does the event say about you? Which
-        positive trait is evident from this event? If you can think of more
-        than one positive trait, enter the first trait and click submit. Then,
-        fill in the second trait and submit again, and so on."),
+      shiny::textInput("q1_input", "Describe a positive event from today.
+        It can be anything, big or small. E.g., 'I did the dishes.'"),
+      shiny::textInput("q2_input", "How did it make you feel? For example, happy,
+        excited, proud, or neutral?"),
+      shiny::textInput("q3_input", "What does this event say about you?
+        Which positive personality trait is evident? E.g., determined, helpful,
+        creative. Enter one trait at a time and submit."),
       # Submit input
       shiny::actionButton("save_button", "Submit")
       ),
@@ -99,9 +104,10 @@ server <- function(input, output, session) {
   source("R/save_whitebook_entry.R")
   source("R/first_use_app.R")
   source("R/save_likelihood_selfimage.R")
+  source("R/generate_likelihood_plot.R")
 
   # Load the content of the introduction text file
-  introduction_text <- readr::read_file("R/introduction.md")
+  introduction_text <- readr::read_file("inst/introduction.md")
 
   # Load user-defined positive self-image
   pos_selfimage <- if (file.exists("pos_selfimage.txt")) {
@@ -118,10 +124,15 @@ server <- function(input, output, session) {
     shiny::HTML(markdown::markdownToHTML(introduction_text, template = FALSE))
   })
 
+  # Render image
+  output$selflove <- renderImage({
+    list(src = "R/www/selflove.png", width = "50%")
+  }, deleteFile = FALSE)
+
   # Render the positive self-image text
   output$self_image_text <- renderUI({
     p(paste("When you first started up this app
-      you defined your desired self-image to be:", pos_selfimage, "."))
+            you defined your desired self-image to be:", pos_selfimage, "."))
   })
 
   # Create empty data frames for if data does not exist
@@ -141,9 +152,9 @@ server <- function(input, output, session) {
   # Load data if it exists, otherwise load default data
   whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
   wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
-  likelihood_data <- dataloading("selfimage_data.csv", default_wordcloud_data)
+  selfimage_data <- dataloading("selfimage_data.csv", default_selfimage_data)
 
-  # Ensure Date column is character
+  # Ensure date column is character type
   whitebook_data$Date <- as.character(whitebook_data$Date)
 
   # Render wordcloud
@@ -165,21 +176,9 @@ server <- function(input, output, session) {
     }
   )
 
-
-  # Render likelihood graph
+  # Render likelihood plot
   output$plot <- shiny::renderPlot({
-    # Create the line and point graph with date on the x-axis
-    ggplot2::ggplot(likelihood_data,
-                    ggplot2::aes(x = date, y = likelihood_selfimage)) +
-      ggplot2::geom_line(color = "#00008B", linewidth = 1) +
-      ggplot2::geom_point(color = "#00008B", size = 3) +
-      ggplot2::labs(title = paste("Likelihood '", pos_selfimage, "'"),
-                    x = "Date",
-                    y = "Likelihood") +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold")
-      )
+    generate_likelihood_plot(selfimage_data, pos_selfimage)
   })
 
   # Download plot
@@ -202,9 +201,87 @@ server <- function(input, output, session) {
   })
 
   # Handle submitted input whitebook
-  save_whitebook_entry(input, output, whitebook_data)
+  observeEvent(input$save_button, {
+    result <- save_whitebook_entry("whitebook_data.csv",
+                                   input$q1_input,
+                                   input$q2_input,
+                                   input$q3_input,
+                                   "wordcloud_data.csv")
+    if (result$success) {
+      whitebook_data <<- result$whitebook_data
+      wordcloud_data <<- result$wordcloud_data
+
+      # Update wordcloud
+      output$wordcloud <- renderPlot({
+        generate_wordcloud(wordcloud_data)
+      })
+
+      # Update whitebook data table
+      output$whitebook_table <- DT::renderDataTable({
+        DT::datatable(whitebook_data)
+      })
+
+      shiny::showModal(shiny::modalDialog(
+        title = "Submitted",
+        "Your entry has been submitted successfully.",
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_submit, {
+        shiny::removeModal()
+      })
+    } else {
+      shiny::showModal(shiny::modalDialog(
+        title = "Error",
+        result$message,
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_error", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_error, {
+        shiny::removeModal()
+      })
+    }
+  })
 
   # Handle submitted input likelihood positive self-image
-  save_likelihood_selfimage(input, output, likelihood_data, pos_selfimage)
+  observeEvent(input$save_button2, {
+    # Get submitted input slider
+    likelihood <- input$slider1
 
+    # Save likelihood positive self-image
+    result <- save_likelihood_selfimage(likelihood, "selfimage_data.csv")
+
+    if (result$success) {
+      selfimage_data <<- result$data
+
+      # Update plot
+      output$plot <- renderPlot({
+        generate_likelihood_plot(selfimage_data, pos_selfimage)
+      })
+
+      shiny::showModal(shiny::modalDialog(
+        title = "Submitted",
+        "Your rating has been submitted successfully.",
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit2", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_submit2, {
+        shiny::removeModal()
+      })
+    } else {
+      shiny::showModal(shiny::modalDialog(
+        title = "Already Submitted",
+        result$message,
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit3", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_submit3, {
+        shiny::removeModal()
+      })
+    }
+  })
 }
