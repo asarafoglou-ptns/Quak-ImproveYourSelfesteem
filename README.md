@@ -18,7 +18,7 @@ English-speaking adult A who suffers from low self-esteem [app possibly used in 
 
 Computer with R installed and the following R packages: devtools, shiny, wordcloud, dplyr, markdown, readr, DT, bslib, ggplot2.
 
-### Scenario: 
+### Scenario
 
 1. Individual A starts up R/R studio and 
 2. Individual A runs the R shiny self-esteem app for the first time
@@ -34,12 +34,6 @@ Computer with R installed and the following R packages: devtools, shiny, wordclo
 12. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image.
 13. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
 
-## Flowchart
-
-![Flowchart starting up the app](ImproveYourSelfesteem/inst/images/Flowchart_run_app.png)
-![Flowchart for the whitebook tab](ImproveYourSelfesteem/inst/images/Flowchart_whitebook_tab.png)
-![Flowchart for the positive self-image tab, entry subtab](ImproveYourSelfesteem/inst/images/Flowchart_positive_selfimage.png)
-
 ## How to
 
 ### Installing the package
@@ -47,19 +41,25 @@ Computer with R installed and the following R packages: devtools, shiny, wordclo
 Start up R/Rstudio.
 
 Before you install the package, make sure you have devtools installed. You can install the devtools package by running the following line in your console:
+
 >install.packages("devtools")
 
 Next, install the package by running: 
+
 >devtools::install_github(asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem)
 
 ### Running the app
 
 Each time you want to use the app, open R/Rstudio and in your console run:
+
 >ImproveYourSelfesteem::run_app() 
+
 This will start up the user interface.
 
 If while running the app you encounter the following error message, restart R by running:
+
 >.rs.restartR()
+
 then run run_app() again:
 ![Error message](ImproveYourSelfesteem/inst/images/Error_message.png)
 
@@ -72,13 +72,19 @@ After working through the introduction, you will be shown the main app. You can 
 ### Running the indivdual functions
 
 Alternatively, if you do not want to run the entire shiny app, you can run the individual functions.
-save_whitebook_entry can be used to save an indivudual whitebook entry to a specified csv file.
-save_likelihood_selfimage can be used to save a likelihood of the desired positive self-image rating to a specified csv file.
-generate_wordcloud can be used to make a wordcloud of a dataframe with columns "word" and "freq", such as is created by the 
-save_whitebook_entry function. Be sure to first load the csv dataset as a dataframe in R.
-generate_likelihood_plot can be used to make a likelihood graph of a dataframe with columns "date" and "likelihood_selfimage", 
-such as is created by the save_likelihood_selfimage function. Be sure to first load the csv dataset as a dataframe in R.
+- save_whitebook_entry can be used to save an indivudual whitebook entry to a specified csv file.
+- save_likelihood_selfimage can be used to save a likelihood of the desired positive self-image rating to a specified csv file.
+- generate_wordcloud can be used to make a wordcloud of a dataframe with columns "word" and "freq", such as is created by the 
+- save_whitebook_entry function. Be sure to first load the csv dataset as a dataframe in R.
+- generate_likelihood_plot can be used to make a likelihood graph of a dataframe with columns "date" and "likelihood_selfimage",  such as is created by the save_likelihood_selfimage function. Be sure to first load the csv dataset as a dataframe in R.
 For more information, read the documentation of each function, for example by running: ?ImproveYourSelfesteem::save_whitebook_entry
+
+## Flowchart
+
+![Flowchart starting up the app](ImproveYourSelfesteem/inst/images/Flowchart_run_app.png)
+![Flowchart for the whitebook tab](ImproveYourSelfesteem/inst/images/Flowchart_whitebook_tab.png)
+![Flowchart for the positive self-image tab, entry subtab](ImproveYourSelfesteem/inst/images/Flowchart_positive_selfimage.png)
+
 
 ## Example application
 
@@ -86,31 +92,39 @@ For more information, read the documentation of each function, for example by ru
 2. Individual A runs the R shiny self-esteem app
 ![Run app](ImproveYourSelfesteem/inst/images/run_app.png)
 3. Self-esteem app opens
+![Open app](ImproveYourSelfesteem/inst/images/open_app.png)
 4. Individual A is shown an introduction with an explanation about the app
+![Introduction](ImproveYourSelfesteem/inst/images/introduction.png)
 5. Individual A clicks ok button
 6. Individual A is asked to define their current negative self-image
 7. Individual A types in a sentence in the text box.
+![Negative self-image](ImproveYourSelfesteem/inst/images/neg_selfimage.png)
 8. Individual A clicks ok button
 9. Individual A is shown the message: “submitted”
 10. Individual A is asked to define the positive self-image they want to strive for 
 11. Individual A types in a sentence in the text box.
+![Positive self-image](ImproveYourSelfesteem/inst/images/pos_selfimage.png)
 12. Individual A clicks ok button
 13. Individual A is shown the message: “submitted”
-14. Individual A is asked to rate the likeliness of their defined positive self-image and enter a number between 0 and 100
-15. Individual A types in a number between 0 and 100
-16. Individual A clicks next button
-17. Modal window closes and individual A is shown the main page. They are shown the introduction tab, which repeats the introduction text.
-18. Individual A navigates to the "whitebook" tab, subtab "new entry" 
-19. Individual A is shown page with an instruction, three questions with input text boxes (“describe something that went well/you did well today”, “what feeling did it give you?”, “what does the event say about you? which positive trait can you couple to it?”)
+14. Modal window closes and individual A is shown the main page. They are shown the introduction tab, which repeats the introduction text.
+![Navigation tabs](ImproveYourSelfesteem/inst/images/Howto_tabnav.png)
+15. Individual A navigates to the "whitebook" tab, subtab "new entry" 
+16. Individual A is shown page with an instruction, three questions with input text boxes (“describe something that went well/you did well today”, “what feeling did it give you?”, “what does the event say about you? which positive trait can you couple to it?”)
 ![Whitebook](ImproveYourSelfesteem/inst/images/whitebook_entry.png)
-20. Individual A reads the explanation and inputs a few entries into the whitebook about what went right that day, how it made them feel, and what the event says about the user's personality. They press the submit button.
+17. Individual A reads the explanation and inputs a few entries into the whitebook about what went right that day, how it made them feel, and what the event says about the user's personality. They press the submit button.
 ![Whitebook](ImproveYourSelfesteem/inst/images/submitted_whitebook_entry.png)
-21. Individual A fills in and submits three more answers.
-22. Individual A navigates to the "view entries" subtab and reads their submissions.
-23. Individual A navigates to the "wordcloud" subtab and looks at a wordcloud of their entered positive traits.
-24. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image.
-25. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
-26. Individual A closes app.
+18. Individual A fills in and submits three more answers.
+19. Individual A navigates to the "view entries" subtab and reads their submissions.
+![Whitebook](ImproveYourSelfesteem/inst/images/whitebook.png)
+20. Individual A navigates to the "wordcloud" subtab and looks at a wordcloud of their entered positive traits.
+![Wordcloud](ImproveYourSelfesteem/inst/images/wordcloud.png)
+21. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image.
+![Entry likelihood positive self-image](ImproveYourSelfesteem/inst/images/likelihood_entry.png)
+22. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
+![Plot likelihood positive self-image](ImproveYourSelfesteem/inst/images/likelihood_graph.png)
+23. Individual A clicks the "save plot as image" button to save the likelihood graph.
+![Save plot](ImproveYourSelfesteem/inst/images/save_plot.png)
+24. Individual A closes app.
 
 ## References
 
