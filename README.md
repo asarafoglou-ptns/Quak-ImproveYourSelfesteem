@@ -46,7 +46,7 @@ Before you install the package, make sure you have devtools installed. You can i
 
 Next, install the package by running: 
 
->devtools::install_github(asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem)
+>devtools::install_github("asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem")
 
 ### Running the app
 
