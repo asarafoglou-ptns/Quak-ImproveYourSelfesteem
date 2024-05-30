@@ -98,13 +98,20 @@ ui <- shiny::navbarPage(
 )
 
 server <- function(input, output, session) {
+  # Load background wordcloud function
+  source(system.file("R", "generate_wordcloud.R", package = "ImproveYourSelfesteem"))
+  source(system.file("R", "dataloading.R", package = "ImproveYourSelfesteem"))
+  source(system.file("R", "save_whitebook_entry.R", package = "ImproveYourSelfesteem"))
+  source(system.file("R", "first_use_app.R", package = "ImproveYourSelfesteem"))
+  source(system.file("R", "save_likelihood_selfimage.R", package = "ImproveYourSelfesteem"))
+  source(system.file("R", "generate_likelihood_plot.R", package = "ImproveYourSelfesteem"))
 
   # Load the content of the introduction text file
-  introduction_text <- readr::read_file("inst/introduction.md")
+  introduction_text <- readr::read_file(system.file("inst", "introduction.md", package = "ImproveYourSelfesteem"))
 
   # Load user-defined positive self-image
-  pos_selfimage <- if (file.exists("pos_selfimage.txt")) {
-    readr::read_file("pos_selfimage.txt")
+  pos_selfimage <- if (file.exists(system.file("pos_selfimage.txt", package = "ImproveYourSelfesteem"))) {
+    readr::read_file(system.file("pos_selfimage.txt", package = "ImproveYourSelfesteem"))
   } else {
     "Not defined yet"
   }
@@ -119,13 +126,13 @@ server <- function(input, output, session) {
 
   # Render image
   output$selflove <- renderImage({
-    list(src = "R/www/selflove.png", width = "50%")
+    list(src = system.file("R", "www/selflove.png", package = "ImproveYourSelfesteem"), width = "50%")
   }, deleteFile = FALSE)
 
   # Render the positive self-image text
   output$self_image_text <- renderUI({
     p(paste("When you first started up this app
-            you defined your desired self-image to be:", pos_selfimage, "."))
+      you defined your desired self-image to be:", pos_selfimage, "."))
   })
 
   # Create empty data frames for if data does not exist
@@ -143,9 +150,9 @@ server <- function(input, output, session) {
                                        likelihood_selfimage = numeric(0))
 
   # Load data if it exists, otherwise load default data
-  whitebook_data <- dataloading("whitebook_data.csv", default_whitebook_data)
-  wordcloud_data <- dataloading("wordcloud_data.csv", default_wordcloud_data)
-  selfimage_data <- dataloading("selfimage_data.csv", default_selfimage_data)
+  whitebook_data <- dataloading(system.file("whitebook_data.csv", package = "ImproveYourSelfesteem"), default_whitebook_data)
+  wordcloud_data <- dataloading(system.file("wordcloud_data.csv", package = "ImproveYourSelfesteem"), default_wordcloud_data)
+  selfimage_data <- dataloading(system.file("selfimage_data.csv", package = "ImproveYourSelfesteem"), default_selfimage_data)
 
   # Ensure date column is character type
   whitebook_data$Date <- as.character(whitebook_data$Date)
@@ -173,7 +180,6 @@ server <- function(input, output, session) {
   output$plot <- shiny::renderPlot({
     generate_likelihood_plot(selfimage_data, pos_selfimage)
   })
-
   # Download plot
   output$download_plot <- shiny::downloadHandler(
     filename = function() {
@@ -194,84 +200,95 @@ server <- function(input, output, session) {
   })
 
   # Handle submitted input whitebook
-  observeEvent(input$save_button, {
-    result <- save_whitebook_entry("whitebook_data.csv",
-                                   input$q1_input,
-                                   input$q2_input,
-                                   input$q3_input,
-                                   "wordcloud_data.csv")
+  shiny::observeEvent(input$save_button, {
+    result <- save_whitebook_entry(system.file("whitebook_data.csv", package = "ImproveYourSelfesteem"),
+                                   input$event,
+                                   input$feeling,
+                                   input$pers_trait,
+                                   system.file("wordcloud_data.csv", package = "ImproveYourSelfesteem"))
+
     if (result$success) {
       whitebook_data <<- result$whitebook_data
       wordcloud_data <<- result$wordcloud_data
 
-      # Update wordcloud
-      output$wordcloud <- renderPlot({
-        generate_wordcloud(wordcloud_data)
-      })
-
-      # Update whitebook data table
+      # Update the whitebook table
       output$whitebook_table <- DT::renderDataTable({
         DT::datatable(whitebook_data)
       })
 
+      # Update the wordcloud plot
+      output$wordcloud <- shiny::renderPlot({
+        generate_wordcloud(wordcloud_data)
+      })
+
+      # Show message that the entry has been submitted
       shiny::showModal(shiny::modalDialog(
         title = "Submitted",
         "Your entry has been submitted successfully.",
         easyClose = TRUE,
-        footer = shiny::actionButton("ok_submit", "ok")
+        footer = shiny::actionButton("ok_submit", "OK")
       ))
 
+      # Close modal when OK button is pressed
       shiny::observeEvent(input$ok_submit, {
         shiny::removeModal()
       })
     } else {
+      # Show message when not all questions are answered
       shiny::showModal(shiny::modalDialog(
-        title = "Error",
+        title = "Incomplete Entry",
         result$message,
         easyClose = TRUE,
-        footer = shiny::actionButton("ok_error", "ok")
+        footer = shiny::actionButton("ok_submit", "OK")
       ))
 
-      shiny::observeEvent(input$ok_error, {
+      # Close modal when OK button is pressed
+      shiny::observeEvent(input$ok_submit, {
         shiny::removeModal()
       })
     }
   })
 
   # Handle submitted input likelihood positive self-image
-  observeEvent(input$save_button2, {
+  shiny::observeEvent(input$save_button2, {
     # Get submitted input slider
-    likelihood <- input$slider1
+    likelihood <- shiny::isolate(input$slider1)
 
     # Save likelihood positive self-image
-    result <- save_likelihood_selfimage(likelihood, "selfimage_data.csv")
+    result <- save_likelihood_selfimage(selfimage_data,
+                                        likelihood,
+                                        system.file("selfimage_data.csv", package = "ImproveYourSelfesteem"))
 
     if (result$success) {
       selfimage_data <<- result$data
 
       # Update plot
-      output$plot <- renderPlot({
+      output$plot <- shiny::renderPlot({
         generate_likelihood_plot(selfimage_data, pos_selfimage)
       })
 
+      # Show message that the rating has been submitted
       shiny::showModal(shiny::modalDialog(
         title = "Submitted",
         "Your rating has been submitted successfully.",
         easyClose = TRUE,
-        footer = shiny::actionButton("ok_submit2", "ok")
+        footer = shiny::actionButton("ok_submit2", "OK")
       ))
 
+      # Close modal when OK button is pressed
       shiny::observeEvent(input$ok_submit2, {
         shiny::removeModal()
       })
     } else {
+      # Show message when daily entry already submitted
       shiny::showModal(shiny::modalDialog(
         title = "Already Submitted",
         result$message,
         easyClose = TRUE,
-        footer = shiny::actionButton("ok_submit3", "ok")
+        footer = shiny::actionButton("ok_submit3", "OK")
       ))
 
+      # Close modal when OK button is pressed
       shiny::observeEvent(input$ok_submit3, {
         shiny::removeModal()
       })
