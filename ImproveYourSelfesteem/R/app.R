@@ -179,8 +179,9 @@ server <- function(input, output, session) {
   )
 
   # Render likelihood plot
-  output$plot <- generate_likelihood_plot(selfimage_data, pos_selfimage)
-
+  output$plot <- shiny::renderPlot({
+    generate_likelihood_plot(selfimage_data, pos_selfimage)
+  })
   # Download plot
   output$download_plot <- shiny::downloadHandler(
     filename = function() {
@@ -204,6 +205,48 @@ server <- function(input, output, session) {
   save_whitebook_entry(input, output, whitebook_data)
 
   # Handle submitted input likelihood positive self-image
-  save_likelihood_selfimage(input, output, selfimage_data, pos_selfimage)
+  shiny::observeEvent(input$save_button2, {
+    # Get submitted input slider
+    likelihood <- shiny::isolate(input$slider1)
 
+    # Save likelihood positive self-image
+    result <- save_likelihood_selfimage(selfimage_data,
+                                        likelihood,
+                                        "selfimage_data.csv")
+
+    if (result$success) {
+      selfimage_data <<- result$data
+
+      # Update plot
+      output$plot <- shiny::renderPlot({
+        generate_likelihood_plot(selfimage_data, pos_selfimage)
+      })
+
+      # Show message that answers have been submitted
+      shiny::showModal(shiny::modalDialog(
+        title = "Submitted",
+        "Your rating has been submitted successfully.",
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit2", "ok")
+      ))
+
+      # Close modal when ok button is pressed
+      shiny::observeEvent(input$ok_submit2, {
+        shiny::removeModal()
+      })
+    } else {
+      # Show message when daily entry already submitted
+      shiny::showModal(shiny::modalDialog(
+        title = "Already Submitted",
+        result$message,
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit3", "ok")
+      ))
+
+      # Close modal when ok button is pressed
+      shiny::observeEvent(input$ok_submit3, {
+        shiny::removeModal()
+      })
+    }
+  })
 }

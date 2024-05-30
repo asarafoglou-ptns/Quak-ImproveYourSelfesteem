@@ -1,55 +1,57 @@
-# Function to save self-image likelihood rating and update graph
-save_likelihood_selfimage <- function(input, output, selfimage_data, pos_selfimage) {
-  shiny::observeEvent(input$save_button2, {
-    # Get date
-    date <- Sys.Date()
+#' @title Save Self-Image Likelihood Rating
+#'
+#' @description This function saves the daily likelihood rating of the user's
+#' desired positive self-image to a CSV file and updates the data frame.
+#'
+#' @param selfimage_data A data frame containing self-image data with
+#' columns 'date' and 'likelihood_selfimage'.
+#' @param likelihood A numeric value between 0 and 100 that indicates how
+#' likely the user thinks their desired positive self-image is to be true.
+#' @param file_name A character string representing the name of the csv file
+#' where the data should be saved.
+#' @return The updated data frame with the new likelihood rating added.
+#' @examples
+#' # Example usage:
+#' selfimage_data <- data.frame(date = as.Date(character(0)),
+#' likelihood_selfimage = numeric(0))
+#' updated_data <- save_likelihood_selfimage(selfimage_data, 75,
+#' "selfimage_data.csv")
+#' @export
+save_likelihood_selfimage <- function(selfimage_data,
+                                      likelihood,
+                                      file_name) {
+  # Load existing data if the file exists
+  if (file.exists(file_name)) {
+    selfimage_data <- readr::read_csv(file_name, show_col_types = FALSE)
+  }
 
-    # Check if an entry already exists for the current date
-    entry_exists <- nrow(selfimage_data[selfimage_data$date == date, ]) > 0
+  # Ensure the date and likelihood columns are of the correct type
+  selfimage_data$date <- as.Date(selfimage_data$date)
+  selfimage_data$likelihood_selfimage <- as.numeric(selfimage_data$likelihood_selfimage)
 
-    if (!entry_exists) {
-      # Get submitted input slider
-      likelihood <- shiny::isolate(input$slider1)
+  # Get the current date
+  date <- Sys.Date()
 
-      # Add submission to data
-      row <- data.frame(date = date, likelihood_selfimage = likelihood)
+  # Print debugging information
+  print(paste("Date:", date))
+  print("Current data:")
+  print(selfimage_data)
 
-      # Append the new row to the existing selfimage data
-      selfimage_data <<- dplyr::bind_rows(selfimage_data, row)
+  # Check if an entry already exists for the current date
+  entry_exists <- nrow(selfimage_data[selfimage_data$date == date, ]) > 0
 
-      # Write updated data to CSV
-      readr::write_csv(selfimage_data, "selfimage_data.csv")
+  if (!entry_exists) {
+    # Add submission to data
+    row <- data.frame(date = date, likelihood_selfimage = likelihood)
 
-      # Update plot
-      output$plot <- shiny::renderPlot({
-        generate_likelihood_plot(selfimage_data, pos_selfimage)
-      })
+    # Append the new row to the existing selfimage data
+    selfimage_data <- dplyr::bind_rows(selfimage_data, row)
 
-      # Show message that answers have been submitted
-      shiny::showModal(shiny::modalDialog(
-        title = "Submitted",
-        "Your rating has been submitted successfully.",
-        easyClose = TRUE,
-        footer = shiny::actionButton("ok_submit2", "ok")
-      ))
+    # Write updated data to CSV
+    readr::write_csv(selfimage_data, file_name)
 
-      # Close modal when ok button is pressed
-      shiny::observeEvent(input$ok_submit2, {
-        shiny::removeModal()
-      })
-    } else {
-      # Show message when daily entry already submitted
-      shiny::showModal(shiny::modalDialog(
-        title = "Already Submitted",
-        "You have already submitted an entry for today. You can only rate the likeliness of your positive self-image once daily.",
-        easyClose = TRUE,
-        footer = shiny::actionButton("ok_submit3", "ok")
-      ))
-
-      # Close modal when ok button is pressed
-      shiny::observeEvent(input$ok_submit3, {
-        shiny::removeModal()
-      })
-    }
-  })
+    return(list(success = TRUE, data = selfimage_data))
+  } else {
+    return(list(success = FALSE, message = "You have already submitted an entry for today. You can only rate the likeliness of your positive self-image once daily."))
+  }
 }

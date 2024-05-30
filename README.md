@@ -95,5 +95,6 @@ After working through the introduction, you will be shown the main app. You can 
 ## References
 
 De Neef, M. (2022). *Negatief zelfbeeld* (Revised). Boom.
+
 De Neef, M. (z.d.). <https://www.negatiefzelfbeeldbehandelen.nl/>
 
