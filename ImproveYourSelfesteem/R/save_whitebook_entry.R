@@ -22,11 +22,11 @@ save_whitebook_entry <- function(whitebook_file, event, feeling, pers_trait, wor
   if (file.exists(whitebook_file)) {
     whitebook_data <- readr::read_csv(whitebook_file,
                                       show_col_types = FALSE,
-                                      col_types = cols(
-                                        Date = col_character(),
-                                        Event = col_character(),
-                                        Feeling = col_character(),
-                                        Pers_trait = col_character()
+                                      col_types = readr::cols(
+                                        Date = readr::col_character(),
+                                        Event = readr::col_character(),
+                                        Feeling = readr::col_character(),
+                                        Pers_trait = readr::col_character()
                                       ))
   } else {
     whitebook_data <- data.frame(Date = character(),
