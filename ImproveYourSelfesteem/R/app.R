@@ -98,13 +98,6 @@ ui <- shiny::navbarPage(
 )
 
 server <- function(input, output, session) {
-  # Load background wordcloud function
-  source("R/generate_wordcloud.R")
-  source("R/dataloading.R")
-  source("R/save_whitebook_entry.R")
-  source("R/first_use_app.R")
-  source("R/save_likelihood_selfimage.R")
-  source("R/generate_likelihood_plot.R")
 
   # Load the content of the introduction text file
   introduction_text <- readr::read_file("inst/introduction.md")
