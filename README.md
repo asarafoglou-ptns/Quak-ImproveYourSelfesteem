@@ -64,7 +64,7 @@ then run run_app() again:
 ![Error message](ImproveYourSelfesteem/inst/images/Error_message.png)
 
 The run_app() function will start up the user interface. When first starting up the app, an introduction will be shown.
-[Insert image]
+![Introduction](ImproveYourSelfesteem/inst/images/introduction.png)
 After working through the introduction, you will be shown the main app. You can navigate through the app by clicking the tabs at the top of the page. 
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/Howto_tabnav.png)
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/whitebook_entry.png)
