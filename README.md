@@ -31,7 +31,7 @@ Computer with R installed and the following R packages: devtools, shiny, wordclo
 9. Individual A reads the explanation and inputs a few entries into the whitebook about what went right that day, how it made them feel, and what the event says about the user's personality.
 10. Individual A reads their entries in the "view entries" subtab
 11. Individual A looks at a wordcloud of their entered positive traits in the wordcloud subtab.
-12. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image.
+12. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image (in percentage, so a number between 0 and 100). 
 13. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
 
 ## How to
@@ -69,14 +69,17 @@ After working through the introduction, you will be shown the main app. You can 
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/Howto_tabnav.png)
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/whitebook_entry.png)
 
+The data you submit in the app will be saved in csv and txt files: 
+![The app saves data in csv and txt files](ImproveYourSelfesteem/inst/images/files.png)
+The next time you open the app, it will load the data from previous sessions. New entries will be added to the already existing data.
+
 ### Running the indivdual functions
 
 Alternatively, if you do not want to run the entire shiny app, you can run the individual functions.
 - save_whitebook_entry can be used to save an indivudual whitebook entry to a specified csv file.
 - save_likelihood_selfimage can be used to save a likelihood of the desired positive self-image rating to a specified csv file.
-- generate_wordcloud can be used to make a wordcloud of a dataframe with columns "word" and "freq", such as is created by the 
-- save_whitebook_entry function. Be sure to first load the csv dataset as a dataframe in R.
-- generate_likelihood_plot can be used to make a likelihood graph of a dataframe with columns "date" and "likelihood_selfimage",  such as is created by the save_likelihood_selfimage function. Be sure to first load the csv dataset as a dataframe in R.
+- generate_wordcloud can be used to make a wordcloud of a dataframe with columns "word" and "freq", such as is created by the save_whitebook_entry function. Be sure to first load the csv dataset created by the save_whitebook_entry function as a dataframe in R.
+- generate_likelihood_plot can be used to make a likelihood graph of a dataframe with columns "date" and "likelihood_selfimage",  such as is created by the save_likelihood_selfimage function. Be sure to first load the csv dataset created by the save_likelihood_selfimage function as a dataframe in R.
 For more information, read the documentation of each function, for example by running: ?ImproveYourSelfesteem::save_whitebook_entry
 
 ## Flowchart
@@ -90,7 +93,6 @@ For more information, read the documentation of each function, for example by ru
 
 1. Individual A starts up R/R studio and 
 2. Individual A runs the R shiny self-esteem app
-![Run app](ImproveYourSelfesteem/inst/images/run_app.png)
 3. Self-esteem app opens
 ![Open app](ImproveYourSelfesteem/inst/images/open_app.png)
 4. Individual A is shown an introduction with an explanation about the app
