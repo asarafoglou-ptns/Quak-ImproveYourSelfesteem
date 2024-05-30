@@ -126,15 +126,13 @@ server <- function(input, output, session) {
 
   # Render image
   output$selflove <- renderImage({
-
     list(src = "R/www/selflove.png", width = "50%")
-
   }, deleteFile = FALSE)
 
   # Render the positive self-image text
   output$self_image_text <- renderUI({
     p(paste("When you first started up this app
-      you defined your desired self-image to be:", pos_selfimage, "."))
+            you defined your desired self-image to be:", pos_selfimage, "."))
   })
 
   # Create empty data frames for if data does not exist
@@ -182,6 +180,7 @@ server <- function(input, output, session) {
   output$plot <- shiny::renderPlot({
     generate_likelihood_plot(selfimage_data, pos_selfimage)
   })
+
   # Download plot
   output$download_plot <- shiny::downloadHandler(
     filename = function() {
@@ -202,27 +201,66 @@ server <- function(input, output, session) {
   })
 
   # Handle submitted input whitebook
-  save_whitebook_entry(input, output, whitebook_data)
+  observeEvent(input$save_button, {
+    result <- save_whitebook_entry("whitebook_data.csv",
+                                   input$q1_input,
+                                   input$q2_input,
+                                   input$q3_input,
+                                   "wordcloud_data.csv")
+    if (result$success) {
+      whitebook_data <<- result$whitebook_data
+      wordcloud_data <<- result$wordcloud_data
+
+      # Update wordcloud
+      output$wordcloud <- renderPlot({
+        generate_wordcloud(wordcloud_data)
+      })
+
+      # Update whitebook data table
+      output$whitebook_table <- DT::renderDataTable({
+        DT::datatable(whitebook_data)
+      })
+
+      shiny::showModal(shiny::modalDialog(
+        title = "Submitted",
+        "Your entry has been submitted successfully.",
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_submit", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_submit, {
+        shiny::removeModal()
+      })
+    } else {
+      shiny::showModal(shiny::modalDialog(
+        title = "Error",
+        result$message,
+        easyClose = TRUE,
+        footer = shiny::actionButton("ok_error", "ok")
+      ))
+
+      shiny::observeEvent(input$ok_error, {
+        shiny::removeModal()
+      })
+    }
+  })
 
   # Handle submitted input likelihood positive self-image
-  shiny::observeEvent(input$save_button2, {
+  observeEvent(input$save_button2, {
     # Get submitted input slider
-    likelihood <- shiny::isolate(input$slider1)
+    likelihood <- input$slider1
 
     # Save likelihood positive self-image
-    result <- save_likelihood_selfimage(selfimage_data,
-                                        likelihood,
-                                        "selfimage_data.csv")
+    result <- save_likelihood_selfimage(likelihood, "selfimage_data.csv")
 
     if (result$success) {
       selfimage_data <<- result$data
 
       # Update plot
-      output$plot <- shiny::renderPlot({
+      output$plot <- renderPlot({
         generate_likelihood_plot(selfimage_data, pos_selfimage)
       })
 
-      # Show message that answers have been submitted
       shiny::showModal(shiny::modalDialog(
         title = "Submitted",
         "Your rating has been submitted successfully.",
@@ -230,12 +268,10 @@ server <- function(input, output, session) {
         footer = shiny::actionButton("ok_submit2", "ok")
       ))
 
-      # Close modal when ok button is pressed
       shiny::observeEvent(input$ok_submit2, {
         shiny::removeModal()
       })
     } else {
-      # Show message when daily entry already submitted
       shiny::showModal(shiny::modalDialog(
         title = "Already Submitted",
         result$message,
@@ -243,7 +279,6 @@ server <- function(input, output, session) {
         footer = shiny::actionButton("ok_submit3", "ok")
       ))
 
-      # Close modal when ok button is pressed
       shiny::observeEvent(input$ok_submit3, {
         shiny::removeModal()
       })

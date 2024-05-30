@@ -47,16 +47,20 @@ Computer with R installed and the following R packages: devtools, shiny, wordclo
 Start up R/Rstudio.
 
 Before you install the package, make sure you have devtools installed. You can install the devtools package by running the following line in your console:
-install.packages("devtools")
+>install.packages("devtools")
 
 Next, install the package by running: 
-devtools::install_github(asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem)
+>devtools::install_github(asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem)
 
 ### Running the app
 
-Each time you want to use the app, open R/Rstudio and run ImproveYourSelfesteem::run_app() in your console. This will start up the user interface.
+Each time you want to use the app, open R/Rstudio and in your console run:
+>ImproveYourSelfesteem::run_app() 
+This will start up the user interface.
 
-If while running the app you encounter the following error message, restart R by running .rs.restartR(), then run run_app() again:
+If while running the app you encounter the following error message, restart R by running:
+>.rs.restartR()
+then run run_app() again:
 ![Error message](ImproveYourSelfesteem/inst/images/Error_message.png)
 
 The run_app() function will start up the user interface. When first starting up the app, an introduction will be shown.
@@ -64,6 +68,17 @@ The run_app() function will start up the user interface. When first starting up 
 After working through the introduction, you will be shown the main app. You can navigate through the app by clicking the tabs at the top of the page. 
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/Howto_tabnav.png)
 ![Navigation tabs](ImproveYourSelfesteem/inst/images/whitebook_entry.png)
+
+### Running the indivdual functions
+
+Alternatively, if you do not want to run the entire shiny app, you can run the individual functions.
+save_whitebook_entry can be used to save an indivudual whitebook entry to a specified csv file.
+save_likelihood_selfimage can be used to save a likelihood of the desired positive self-image rating to a specified csv file.
+generate_wordcloud can be used to make a wordcloud of a dataframe with columns "word" and "freq", such as is created by the 
+save_whitebook_entry function. Be sure to first load the csv dataset as a dataframe in R.
+generate_likelihood_plot can be used to make a likelihood graph of a dataframe with columns "date" and "likelihood_selfimage", 
+such as is created by the save_likelihood_selfimage function. Be sure to first load the csv dataset as a dataframe in R.
+For more information, read the documentation of each function, for example by running: ?ImproveYourSelfesteem::save_whitebook_entry
 
 ## Example application
 
@@ -84,13 +99,18 @@ After working through the introduction, you will be shown the main app. You can 
 14. Individual A is asked to rate the likeliness of their defined positive self-image and enter a number between 0 and 100
 15. Individual A types in a number between 0 and 100
 16. Individual A clicks next button
-17. Individual A is shown page with an instruction, three questions with input text boxes (“describe something that went well/you did well today”, “what feeling did it give you?”, “what does the event say about you? which positive trait can you couple to it?”)
-18. Individual A puts in answers and presses submit button
-19. Individual A fills in and submits three more answers
-20. Individual A goes to tab “Likeliliness positive self-image”.
-21. Individual A is asked to rate the likeliness of their defined positive self-image and enters a number between 0 and 100
-22. Individual A goes to tab “wordcloud” to watch image of a wordcloud of the answers to positive traits they entered before. They see that the positive traits they entered the most are biggest
-23. Individual A goes to tab “graph positive self-image” to watch how their belief in their positive self-image has shifted from week to week
+17. Modal window closes and individual A is shown the main page. They are shown the introduction tab, which repeats the introduction text.
+18. Individual A navigates to the "whitebook" tab, subtab "new entry" 
+19. Individual A is shown page with an instruction, three questions with input text boxes (“describe something that went well/you did well today”, “what feeling did it give you?”, “what does the event say about you? which positive trait can you couple to it?”)
+![Whitebook](ImproveYourSelfesteem/inst/images/whitebook_entry.png)
+20. Individual A reads the explanation and inputs a few entries into the whitebook about what went right that day, how it made them feel, and what the event says about the user's personality. They press the submit button.
+![Whitebook](ImproveYourSelfesteem/inst/images/submitted_whitebook_entry.png)
+21. Individual A fills in and submits three more answers.
+22. Individual A navigates to the "view entries" subtab and reads their submissions.
+23. Individual A navigates to the "wordcloud" subtab and looks at a wordcloud of their entered positive traits.
+24. Individual A goes to tab "Positive self-image", subtab "new entry" and rates their belief in their desired positive self-image.
+25. Individual A goes to subtab “Progress graph” to watch how their belief in their positive self-image has shifted over time.
+26. Individual A closes app.
 
 ## References
 

@@ -3,8 +3,6 @@
 #' @description This function saves the daily likelihood rating of the user's
 #' desired positive self-image to a CSV file and updates the data frame.
 #'
-#' @param selfimage_data A data frame containing self-image data with
-#' columns 'date' and 'likelihood_selfimage'.
 #' @param likelihood A numeric value between 0 and 100 that indicates how
 #' likely the user thinks their desired positive self-image is to be true.
 #' @param file_name A character string representing the name of the csv file
@@ -12,17 +10,19 @@
 #' @return The updated data frame with the new likelihood rating added.
 #' @examples
 #' # Example usage:
-#' selfimage_data <- data.frame(date = as.Date(character(0)),
-#' likelihood_selfimage = numeric(0))
-#' updated_data <- save_likelihood_selfimage(selfimage_data, 75,
-#' "selfimage_data.csv")
+#' updated_data <- save_likelihood_selfimage(75, "selfimage_data.csv")
+#' print(updated_data)
 #' @export
-save_likelihood_selfimage <- function(selfimage_data,
-                                      likelihood,
+
+save_likelihood_selfimage <- function(likelihood,
                                       file_name) {
   # Load existing data if the file exists
   if (file.exists(file_name)) {
     selfimage_data <- readr::read_csv(file_name, show_col_types = FALSE)
+  } else {
+    selfimage_data <- data.frame(date = as.Date(character()),
+                            likelihood_selfimage = numeric(0),
+                            stringsAsFactors = FALSE)
   }
 
   # Ensure the date and likelihood columns are of the correct type
@@ -31,11 +31,6 @@ save_likelihood_selfimage <- function(selfimage_data,
 
   # Get the current date
   date <- Sys.Date()
-
-  # Print debugging information
-  print(paste("Date:", date))
-  print("Current data:")
-  print(selfimage_data)
 
   # Check if an entry already exists for the current date
   entry_exists <- nrow(selfimage_data[selfimage_data$date == date, ]) > 0
@@ -52,6 +47,8 @@ save_likelihood_selfimage <- function(selfimage_data,
 
     return(list(success = TRUE, data = selfimage_data))
   } else {
-    return(list(success = FALSE, message = "You have already submitted an entry for today. You can only rate the likeliness of your positive self-image once daily."))
+    return(list(success = FALSE, message = "You have already submitted an entry
+                for today. You can only rate the likeliness of your positive
+                self-image once daily."))
   }
 }

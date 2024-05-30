@@ -4,12 +4,9 @@
 \alias{save_likelihood_selfimage}
 \title{Save Self-Image Likelihood Rating}
 \usage{
-save_likelihood_selfimage(selfimage_data, likelihood, file_name)
+save_likelihood_selfimage(likelihood, file_name)
 }
 \arguments{
-\item{selfimage_data}{A data frame containing self-image data with
-columns 'date' and 'likelihood_selfimage'.}
-
 \item{likelihood}{A numeric value between 0 and 100 that indicates how
 likely the user thinks their desired positive self-image is to be true.}
 
@@ -25,8 +22,6 @@ desired positive self-image to a CSV file and updates the data frame.
 }
 \examples{
 # Example usage:
-selfimage_data <- data.frame(date = as.Date(character(0)),
-likelihood_selfimage = numeric(0))
-updated_data <- save_likelihood_selfimage(selfimage_data, 75,
-"selfimage_data.csv")
+updated_data <- save_likelihood_selfimage(75, "selfimage_data.csv")
+print(updated_data)
 }
