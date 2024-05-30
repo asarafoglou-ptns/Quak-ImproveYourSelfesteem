@@ -100,7 +100,7 @@ ui <- shiny::navbarPage(
 server <- function(input, output, session) {
 
   # Load the content of the introduction text file
-  introduction_text <- readr::read_file("inst/introduction.md")
+  introduction_text <- readr::read_file("introduction.md")
 
   # Load user-defined positive self-image
   pos_selfimage <- if (file.exists("pos_selfimage.txt")) {
@@ -119,7 +119,7 @@ server <- function(input, output, session) {
 
   # Render image
   output$selflove <- renderImage({
-    list(src = "R/www/selflove.png", width = "50%")
+    list(src = "images/selflove.png", width = "50%")
   }, deleteFile = FALSE)
 
   # Render the positive self-image text

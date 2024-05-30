@@ -48,9 +48,19 @@ Next, install the package by running:
 
 >devtools::install_github("asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem")
 
+Make sure you know where the package is installed. If you want to change the path where the package is installed run:
+
+>custom_library_path <- "path/to/custom/library"
+.libPaths(c(custom_library_path, .libPaths()))
+devtools::install_github("asarafoglou-ptns/Quak-ImproveYourSelfesteem/ImproveYourSelfesteem")
+
 ### Running the app
 
-Each time you want to use the app, open R/Rstudio and in your console run:
+Each time you want to use the app, open R/Rstudio and set your working directory to the package file:
+
+>setwd("path/to/package")
+
+Then, run the app:
 
 >ImproveYourSelfesteem::run_app() 
 
